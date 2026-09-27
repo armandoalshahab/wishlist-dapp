@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WIshlist — Trade stocks &amp; perps with 0% fees</title>
+<meta name="description" content="Stock Trading Spot &amp; Perps with 0% Fees — powered by holding $WISH on Robinhood Chain testnet." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='24' font-size='22'>✨</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ top bar ============ -->
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">✨</span><span class="brand-name">WIshlist</span><span class="badge-zero">0% FEES</span></div>
+  <nav class="tabs">
+    <button class="tab active" data-view="spot">SPOT</button>
+    <button class="tab" data-view="perps">PERPS</button>
+    <button class="tab" data-view="portfolio">PORTFOLIO</button>
+    <button class="tab" data-view="vaults">VAULTS</button>
+    <button class="tab" data-view="rewards">REWARDS</button>
+    <button class="tab" data-view="profile">PROFILE</button>
+  </nav>
+  <div class="top-right">
+    <span class="chain-pill">ROBINHOOD TESTNET · 46630</span>
+    <div class="conn-wrap">
+      <button class="btn btn-connect" id="connectBtn">CONNECT</button>
+    </div>
+  </div>
+</header>
+<nav class="mtabs" id="mtabs"></nav>
+
+<main>
+  <!-- ============ ticker strip ============ -->
+  <div class="ticker" id="ticker"><span class="tk-item mono">loading market data…</span></div>
+
+  <!-- ============ SPOT ============ -->
+  <section class="view" id="view-spot">
+    <div class="trade-grid">
+      <div class="panel market-col">
+        <div class="sym-row" id="symRowSpot"></div>
+        <div class="chart-head">
+          <div><span class="big-price mono" id="bigPrice">—</span><span class="chg" id="chgPct"></span></div>
+          <div class="chart-meta mono" id="chartMeta"></div>
+        </div>
+        <canvas id="chartSpot" height="300"></canvas>
+        <div class="tfs" id="tfRow">
+          <button class="tf" data-tf="1h">1H</button>
+          <button class="tf active" data-tf="4h">4H</button>
+          <button class="tf" data-tf="1d">1D</button>
+          <button class="tf" data-tf="1w">1W</button>
+        </div>
+      </div>
+      <div class="panel order-col">
+        <div class="seg" id="spotSeg"><button class="sbtn active" data-side="buy">BUY</button><button class="sbtn sell" data-side="sell">SELL</button></div>
+        <div class="ord">
+          <label>AMOUNT (ETH)</label>
+          <div class="ord-inp"><input id="spotAmt" type="number" min="0" step="0.0001" placeholder="0.001" /><span>ETH</span></div>
+          <div class="quick"><button data-q="0.001">0.001</button><button data-q="0.005">0.005</button><button data-q="0.01">0.01</button><button data-q="max">MAX</button></div>
+          <div class="ord-line"><span>You receive ≈</span><b class="mono" id="spotRecv">—</b></div>
+          <div class="ord-line"><span>Pool fee</span><b class="mono fee-val" id="spotFee">—</b></div>
+          <div class="ord-line"><span>Price</span><b class="mono" id="spotPx">—</b></div>
+          <div class="ord-line"><span>Route</span><b class="mono" id="spotRoute">—</b></div>
+          <div class="zero-strip" id="zeroSpot">hold ≥ 1,000 $WISH → WIshlist rebates 100% of pool fees</div>
+          <button class="btn btn-primary wide" id="spotBtn">CONNECT WALLET</button>
+        </div>
+        <div class="ob-wrap"><div class="ob-head">ORDER BOOK <span class="mono" id="obTag">simulated</span></div><div class="ob" id="obSpot"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PERPS ============ -->
+  <section class="view" id="view-perps" hidden>
+    <div class="trade-grid">
+      <div class="panel market-col">
+        <div class="sym-row" id="symRowPerp"></div>
+        <div class="chart-head">
+          <div><span class="big-price mono" id="bigPriceP">—</span><span class="chg" id="chgPctP"></span></div>
+          <div class="chart-meta mono" id="chartMetaP"></div>
+        </div>
+        <canvas id="chartPerp" height="300"></canvas>
+        <div class="perp-strip">
+          <div><span class="l">FUNDING</span><b class="mono" id="fundRate">—</b></div>
+          <div><span class="l">OPEN INTEREST</span><b class="mono" id="oiVal">—</b></div>
+          <div><span class="l">MAX LEVERAGE</span><b class="mono">50×</b></div>
+        </div>
+      </div>
+      <div class="panel order-col">
+        <div class="seg" id="perpSeg"><button class="sbtn" data-side="long">LONG</button><button class="sbtn sell active" data-side="short">SHORT</button></div>
+        <div class="ord">
+          <label>MARGIN (ETH)</label>
+          <div class="ord-inp"><input id="perpAmt" type="number" min="0" step="0.0001" placeholder="0.001" /><span>ETH</span></div>
+          <div class="lev-row"><span>LEVERAGE</span><input type="range" id="levSl" min="1" max="50" value="5" /><b class="mono" id="levVal">5×</b></div>
+          <div class="ord-line"><span>Position size</span><b class="mono" id="posSize">—</b></div>
+          <div class="ord-line"><span>Est. liquidation</span><b class="mono" id="liqPx">—</b></div>
+          <div class="ord-line"><span>Fee (taker)</span><b class="mono fee-val" id="perpFee">—</b></div>
+          <div class="zero-strip" id="zeroPerp">hold ≥ 1,000 $WISH → maker &amp; taker 0%</div>
+          <button class="btn btn-primary wide" id="perpBtn">CONNECT WALLET</button>
+          <p class="swap-note" style="font-size:10px;color:var(--dim);margin-top:10px">Indicative venue — no perp engine is deployed on Robinhood Chain testnet yet. Margin shown in ETH.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PORTFOLIO ============ -->
+  <section class="view" id="view-portfolio" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2>PORTFOLIO</h2><span class="hint">live balances from Robinhood Chain testnet</span></div>
+      <div class="grid-3" id="pfCards"></div>
+      <div class="eligibility" id="eligCard"><span class="dot"></span><span class="t">Connect wallet to check your 0-fee eligibility.</span></div>
+      <h3 class="sub">OPEN POSITIONS</h3>
+      <div class="tbl-wrap"><table class="tbl" id="posTbl"><thead><tr><th>MARKET</th><th>TYPE</th><th>SIDE</th><th>SIZE</th><th>ENTRY</th><th>PNL</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ VAULTS ============ -->
+  <section class="view" id="view-vaults" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2>VAULTS</h2><span class="hint">stake $WISH — keep the venue solvent while traders pay 0%</span></div>
+      <div class="vault-grid" id="vaultGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ REWARDS ============ -->
+  <section class="view" id="view-rewards" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2>REWARDS</h2><span class="hint">trade = XP = levels = perks</span></div>
+      <div class="xp-card">
+        <div class="xp-top"><b id="xpLvl">BRONZE</b><span class="mono" id="xpVal">0 XP</span></div>
+        <div class="xp-bar"><i id="xpFill"></i></div>
+        <div class="xp-next" id="xpNext"></div>
+      </div>
+      <div class="lvl-grid" id="lvlGrid"></div>
+      <p class="rwa-disclaimer">XP is tracked per wallet on-chain (testnet). Trading, holding, and vault staking all earn XP. Levels never decay.</p>
+    </div>
+  </section>
+
+  <!-- ============ PROFILE ============ -->
+  <section class="view" id="view-profile" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2>PROFILE</h2><span class="hint">your trading identity</span></div>
+      <div class="prof-grid" id="profGrid"></div>
+      <h3 class="sub">$WISH UTILITY</h3>
+      <div class="util-grid">
+        <div class="ucard"><b>0% SPOT FEES</b><span>hold ≥ 1,000 $WISH</span></div>
+        <div class="ucard"><b>0% PERP FEES</b><span>maker &amp; taker waived</span></div>
+        <div class="ucard"><b>PRIORITY RFQ</b><span>VIP ≥ 25,000 $WISH</span></div>
+        <div class="ucard"><b>VAULT YIELD</b><span>stake for 8–22% APR*</span></div>
+      </div>
+      <p class="rwa-disclaimer">* Indicative testnet APRs. Nothing on this page carries monetary value. $WISH is a testnet utility token on the Vibe/Vibe launchpad.</p>
+    </div>
+  </section>
+</main>
+
+<!-- ============ wallet modal ============ -->
+<div class="modal-bg" id="walletModal" hidden>
+  <div class="modal">
+    <div class="modal-head"><h3>CONNECT WALLET</h3><button class="modal-x" id="walletClose">✕</button></div>
+    <p class="modal-sub">Choose from an installed wallet or a supported option below.</p>
+    <div class="wallet-list" id="walletList"></div>
+    <div class="wallet-sep">OR CONTINUE WITH</div>
+    <div class="wallet-social" id="walletSocial"></div>
+    <p class="modal-foot">By connecting you accept the <a href="https://testnet.vibevibe.fun/" target="_blank" rel="noopener">testnet user agreement</a>. Nothing here has monetary value.</p>
+  </div>
+</div>
+
+<!-- ============ support widget ============ -->
+<div class="support-fab" id="supportFab" title="Contact support">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+</div>
+<div class="support-pop" id="supportPop" hidden>
+  <div class="sp-head">WIshlist SUPPORT</div>
+  <div class="sp-body">Questions about $WISH, 0% fees, or vaults?</div>
+  <div class="sp-links" id="spLinks"></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<footer>
+  <span>WIshlist · BUILDER PROJECT ON VIBE/VIBE TESTNET · <a href="https://explorer.testnet.chain.robinhood.com/token/0xbb3e901eA5B5BAd7f982D6C81F70Fc3b365ceAe7" target="_blank" rel="noopener" id="caLink"><span id="caText"></span></a></span>
+  <span>POWERED BY ROBINHOOD CHAIN · <a href="https://testnet.vibevibe.fun/" target="_blank" rel="noopener">VIBE/VIBE</a></span>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
